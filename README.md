@@ -60,21 +60,12 @@ Naval War 是一个基于 Java + Swing 的简单海战样机。玩家控制军�
   - 碰撞检测：UI 使用 `rectsIntersect(Entity.Rect a, Entity.Rect b)` 来替代缺失的静态 intersect 方法。
   - 绘制细节：当图片存在时优先使用图片渲染；导弹图片会按导弹当前角度旋转；潜艇根据 Type 选择图片子集（RED -> q2/r1，BLACK -> h2/q1）；爆炸可用多帧图片循环显示。
 
-已知假设与注意事项
-------------------
-- GameEngine 源码未在本 README 中详细列出，但 UI 与实体依赖其提供的接口（见上文）。若引擎实现与接口不符，请对照接口做小改动或在 README 中补充说明。
-- 部分实体（例如 Missile）是在 UI 层维护的，为了快速集成而非完全后端化。若希望统一管理，建议把 Missile 迁移到 engine 包并由 engine 统一更新、碰撞处理与冷却控制。
-- 资源路径以相对项目根目录 `resources/*.png` 为准；运行前请确保文件存在且名称与代码一致。
-- 并发：UI（EDT）与 engine 的实现若使用独立线程，需要对实体集合的访问加锁或提供线程安全快照接口；当前代码在 UI 侧对 missiles 使用 synchronized，engine 侧应在 `getSubs()`/`getBombs()`/`getExplosions()` 返回安全的只读视图或快照以避免并发问题。
-
 运行方法
 --------
-1. 确保 JDK 已安装（建议 11+）。
-2. 将项目根目录设置为当前工作目录，确保 `resources/` 目录存在并包含所需图片。
-3. 使用 IDE（如 IntelliJ IDEA）导入项目或用命令行：
-   `javac -d out $(find src -name "*.java")`
-   `java -cp out Main`
-4. 程序会弹出窗口：左右键 / A D 控制移动，空格投弹，1/2 切换武器（导弹有 5 秒冷却）。
+1. 确保 JDK 已安装（建议 11+）
+2. 将项目根目录设置为当前工作目录，确保 `resources/` 目录存在并包含所需图片
+3. 使用 IDE（如 IntelliJ IDEA）导入项目
+4. 程序会弹出窗口：左右键 / A D 控制移动，空格投弹，1/2 切换武器（导弹有 5 秒冷却）
 
 扩展建议
 --------
