@@ -172,9 +172,25 @@ public class GameWindow extends JFrame {
             for (Submarine s : subs){
                 if (!s.isActive()) continue;
                 Entity.Rect box = s.getBox();
-                // 根据对象 hash 选择图片索引，确保稳定但多样
-                int idx = Math.abs(System.identityHashCode(s)) % imgSub.length;
-                BufferedImage subImg = imgSub[idx];
+                // 根据潜艇类型选择图片：
+                // RED -> q2 (index 1) 或 r1 (index 2)
+                // BLACK -> h2 (index 3) 或 q1 (index 0)
+                BufferedImage subImg = null;
+                int idx = -1;
+                try {
+                    Submarine.Type t = s.getType();
+                    int pick = Math.abs(System.identityHashCode(s)) % 2; // 0 or 1 用于在两张图间切换
+                    if (t == Submarine.Type.RED) {
+                        // map 0->1 (q2), 1->2 (r1)
+                        idx = (pick == 0) ? 1 : 2;
+                    } else {
+                        // BLACK: map 0->3 (h2), 1->0 (q1)
+                        idx = (pick == 0) ? 3 : 0;
+                    }
+                    if (idx >= 0 && idx < imgSub.length) subImg = imgSub[idx];
+                } catch (Exception ex) {
+                    subImg = null;
+                }
                 if (subImg != null){
                     g2.drawImage(subImg, box.x, box.y, box.w, box.h, null);
                 } else {
