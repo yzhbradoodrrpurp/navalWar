@@ -167,25 +167,7 @@ public class GameWindow extends JFrame {
                 }
             }
 
-            // 绘制潜艇（使用不同图片或回退）
-            List<Submarine> subs = engine.getSubs();
-            for (Submarine s : subs){
-                if (!s.isActive()) continue;
-                Entity.Rect box = s.getBox();
-                // 根据对象 hash 选择图片索引，确保稳定但多样
-                int idx = Math.abs(System.identityHashCode(s)) % imgSub.length;
-                BufferedImage subImg = imgSub[idx];
-                if (subImg != null){
-                    g2.drawImage(subImg, box.x, box.y, box.w, box.h, null);
-                } else {
-                    g2.setColor(new Color(70, 130, 90));
-                    g2.fillRoundRect(box.x, box.y, box.w, box.h, 20, 20);
-                    g2.setColor(Color.YELLOW);
-                    g2.fillOval(box.x + 8, box.y + box.h/4, 8, 8);
-                }
-            }
-
-            // 绘制炸弹
+            // 绘制炸弹（图片或回退） —— 在潜艇与爆炸前绘制，这样能看到炸弹
             List<Bomb> bombs = engine.getBombs();
             for (Bomb b : bombs){
                 if (!b.isActive()) continue;
@@ -193,7 +175,34 @@ public class GameWindow extends JFrame {
                 if (imgBomb != null){
                     g2.drawImage(imgBomb, box.x, box.y, box.w, box.h, null);
                 } else {
-                    g2.setColor(new Color(30, 30, 30));
+                    g2.setColor(new Color(180, 30, 30));
+                    g2.fillOval(box.x, box.y, box.w, box.h);
+                }
+            }
+
+            // 绘制潜艇（根据类型选择图片或回退）
+            List<Submarine> subs = engine.getSubs();
+            for (Submarine s : subs){
+                if (!s.isActive()) continue;
+                Entity.Rect box = s.getBox();
+                BufferedImage subImg = null;
+                if (imgSub != null && imgSub.length >= 4){
+                    // 变体选择：用 identityHashCode 保持稳定但多样
+                    int variant = Math.abs(System.identityHashCode(s)) % 2; // 0 or 1
+                    if (s.getType() == Submarine.Type.RED){
+                        // RED 使用 q2 (idx1) 或 r1 (idx2)
+                        subImg = imgSub[1 + variant]; // 1 or 2
+                    } else {
+                        // BLACK 使用 h2 (idx3) 或 q1 (idx0)
+                        subImg = (variant == 0) ? imgSub[3] : imgSub[0];
+                    }
+                }
+                if (subImg != null){
+                    g2.drawImage(subImg, box.x, box.y, box.w, box.h, null);
+                } else {
+                    // 回退绘制：红色或黑色椭圆以示区分
+                    if (s.getType() == Submarine.Type.RED) g2.setColor(new Color(200, 40, 40));
+                    else g2.setColor(new Color(30, 30, 30));
                     g2.fillOval(box.x, box.y, box.w, box.h);
                 }
             }
@@ -205,9 +214,9 @@ public class GameWindow extends JFrame {
                 int cx = box.x + box.w/2;
                 int cy = box.y + box.h/2;
                 int r = box.w/2;
-                // 选帧：使用当前时间与半径做简单映射
-                int frameIndex = (int)((System.currentTimeMillis()/120) % Math.max(1, imgExplosion.length));
-                BufferedImage eimg = imgExplosion.length > 0 ? imgExplosion[ frameIndex % imgExplosion.length ] : null;
+                BufferedImage eimg = (imgExplosion != null && imgExplosion.length > 0)
+                        ? imgExplosion[(int)((System.currentTimeMillis()/120) % imgExplosion.length)]
+                        : null;
                 if (eimg != null){
                     g2.drawImage(eimg, cx - r, cy - r, r*2, r*2, null);
                 } else {

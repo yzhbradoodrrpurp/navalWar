@@ -27,7 +27,8 @@ public class Explosion extends Entity {
             if (dist <= threshold){
                 s.damage(1);
                 if (!s.isActive()){
-                    engine.registerKill(s, 10);
+                    // 使用潜艇自身的分值（RED=20, BLACK=10）
+                    engine.registerKill(s, s.getScoreValue());
                 }
             }
         }
@@ -43,4 +44,3 @@ public class Explosion extends Entity {
 
     public boolean isDone(){ return !active; }
 }
-
